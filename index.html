@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Address Input & Response Panels</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      margin: 0;
+      padding: 20px;
+      font-family: 'Roboto', sans-serif;
+      background: linear-gradient(135deg, #ece9e6, #ffffff);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    .main-container {
+      display: flex;
+      gap: 20px;
+      width: 100%;
+      max-width: 1100px;
+      height: 90vh;
+    }
+    .panel {
+      background: #fff;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      border-radius: 10px;
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+    }
+    /* Left panel styles (Form Panel) */
+    .form-header {
+      padding: 20px;
+      text-align: center;
+      background: #007BFF;
+      color: #fff;
+      flex-shrink: 0;
+    }
+    .form-header h1 {
+      margin: 0;
+      font-size: 1.8em;
+    }
+    .fields-wrapper {
+      padding: 20px;
+      overflow-y: auto;
+      flex-grow: 1;
+      background: #f2f2f2;
+    }
+    .address-field {
+      display: flex;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+    .address-field span {
+      display: flex;
+      width: 20px; /* Adjust width for consistent spacing */
+      font-weight: bold;
+      font-size: 1.3em;
+      color: #007BFF;
+      text-align: center;
+    }
+    .address-field input {
+      flex: 1;
+      padding: 10px;
+      font-size: 1em;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      transition: border-color 0.3s;
+    }
+    .address-field input:focus {
+      border-color: #007BFF;
+      outline: none;
+    }
+    .removeBtn {
+      background: #dc3545;
+      color: #fff;
+      border: none;
+      margin-left: 8px;
+      padding: 8px 12px;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    .removeBtn:hover {
+      background: #c82333;
+    }
+    .form-footer {
+      padding: 20px;
+      background: #fff;
+      flex-shrink: 0;
+      border-top: 1px solid #ddd;
+    }
+    #addFieldBtn {
+      background: #28a745;
+      color: #fff;
+      border: none;
+      padding: 10px;
+      font-size: 1.2em;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      margin: 0 auto 20px;
+      display: block;
+      transition: background 0.3s;
+    }
+    #addFieldBtn:hover {
+      background: #218838;
+    }
+    button[type="submit"] {
+      background: #007BFF;
+      color: #fff;
+      border: none;
+      padding: 12px;
+      font-size: 1em;
+      border-radius: 5px;
+      width: 100%;
+      cursor: pointer;
+      transition: background 0.3s;
+      height: 44px; /* Set a fixed height */
+    }
+    button[type="submit"]:hover {
+      background: #0069d9;
+    }
+    /* Right panel styles (Response Panel) */
+    .response-header {
+      padding: 20px;
+      text-align: center;
+      background: #28a745;
+      color: #fff;
+      flex-shrink: 0;
+    }
+    .response-header h2 {
+      margin: 0;
+      font-size: 1.8em;
+    }
+    .response-content {
+      padding: 20px;
+      overflow-y: auto;
+      flex-grow: 1;
+      background: #f8f9fa;
+    }
+    .result-item {
+      margin-bottom: 15px;
+      padding: 15px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      background: #fff;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+      cursor: pointer; /* Add pointer cursor */
+      transition: background 0.3s, transform 0.2s; /* Add transition for hover effect */
+    }
+    .result-item:hover {
+      background: #f1f1f1; /* Change background on hover */
+      transform: scale(1.02); /* Slightly enlarge on hover */
+    }
+    .result-item:last-child {
+      margin-bottom: 0;
+    }
+    .result-item h3 {
+      margin-top: 0;
+      margin-bottom: 10px;
+      color: #333;
+    }
+    .result-item p {
+      margin: 5px 0;
+      color: #555;
+    }
+    .spinner {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 3px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      border-top-color: #fff;
+      animation: spin 1s ease-in-out infinite;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #ddd;
+      margin: 20px 0;
+    }
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      background-color: rgba(0, 0, 0, 0.5);
+    }
+    .modal-content {
+      background-color: #fff;
+      margin: 15% auto;
+      padding: 20px;
+      border: 1px solid #888;
+      width: 80%;
+      border-radius: 10px;
+    }
+    .close {
+      color: #aaa;
+      float: right;
+      font-size: 28px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .close:hover,
+    .close:focus {
+      color: black;
+      text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="main-container">
+    <!-- Left Panel: Form -->
+    <div class="panel">
+      <div class="form-header">
+        <h1>Address Input Form</h1>
+      </div>
+      <div class="fields-wrapper">
+        <form id="addressForm">
+          <!-- Start/End Address Container -->
+          <div id="startEndContainer">
+            <div class="address-field">
+              <span>A</span>
+              <input type="text" name="address" placeholder="Enter start/end address" data-letter="A" />
+            </div>
+          </div>
+          <hr>
+          <!-- Intermediate Addresses Container -->
+          <div id="fieldsContainer">
+            <div class="address-field">
+              <span>B</span>
+              <input type="text" name="address" placeholder="Enter intermediate address" data-letter="B" />
+              <button type="button" class="removeBtn">Remove</button>
+            </div>
+          </div>
+          <button type="button" id="addFieldBtn">+</button>
+        </form>
+      </div>
+      <div class="form-footer">
+        <button type="submit" form="addressForm">Submit</button>
+      </div>
+    </div>
+
+    <!-- Right Panel: Response -->
+    <div class="panel">
+      <div class="response-header">
+        <h2>Response</h2>
+      </div>
+      <div class="response-content" id="response">
+        <p>No results yet.</p>
+      </div>
+    </div>
+  </div>
+
+  <div id="modal" class="modal">
+    <div class="modal-content">
+      <span id="closeModal" class="close">&times;</span>
+      <h2>Route Details</h2>
+      <ul id="modalAddresses"></ul>
+      <ul id="modalDurations"></ul>
+    </div>
+  </div>
+
+  <script>
+    // Function to add a new intermediate address field with a remove button
+    function addAddressField() {
+      const container = document.getElementById('fieldsContainer');
+      const newField = document.createElement('div');
+      newField.className = 'address-field';
+      // Calculate letter: starting from 'B'. If there are already fields, get next letter.
+      const letter = String.fromCharCode(66 + container.children.length);
+      newField.innerHTML = `
+        <span>${letter}</span>
+        <input type="text" name="address" placeholder="Enter intermediate address" data-letter="${letter}" />
+        <button type="button" class="removeBtn">Remove</button>
+      `;
+      container.appendChild(newField);
+      // Attach the remove event listener to the new field's remove button
+      newField.querySelector('.removeBtn').addEventListener('click', function() {
+        container.removeChild(newField);
+      });
+    }
+
+    // Add event listener for the plus button to add a new field
+    document.getElementById('addFieldBtn').addEventListener('click', addAddressField);
+
+    // Event listener for remove buttons on the initial intermediate field
+    document.querySelectorAll('#fieldsContainer .removeBtn').forEach(btn => {
+      btn.addEventListener('click', function(e) {
+        const field = e.target.parentElement;
+        field.parentElement.removeChild(field);
+      });
+    });
+
+    // Form submission: collect inputs from start/end and intermediate addresses
+    document.getElementById('addressForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+
+      const addresses = [];
+      // Get start/end address
+      const startInput = document.querySelector('#startEndContainer input');
+      addresses.push({ letter: startInput.dataset.letter, value: startInput.value });
+      
+      // Get intermediate addresses
+      document.querySelectorAll('#fieldsContainer input').forEach(input => {
+        addresses.push({ letter: input.dataset.letter, value: input.value });
+      });
+
+      // Disable submit button and show spinner
+      const submitButton = document.querySelector('button[type="submit"]');
+      submitButton.disabled = true;
+      submitButton.innerHTML = '<div class="spinner"></div>';
+
+      // Make API call (replace YOUR_API_ENDPOINT with your API URL)
+      fetch('https://patherbe.onrender.com/api', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ addresses: addresses })
+      })
+      .then(response => response.json())
+      .then(data => {
+        // Ensure data is an array
+        if (!Array.isArray(data)) {
+          data = [data];
+        }
+
+        // Build the display content: one box per element with details.
+        const responseContainer = document.getElementById('response');
+        responseContainer.innerHTML = ""; // Clear previous content
+
+        if (data.error) {
+          responseContainer.innerHTML = `<p>Error: ${data.error}</p>`;
+        } else if (data.length === 0) {
+          responseContainer.innerHTML = "<p>No results found.</p>";
+        } else {
+          data.forEach(item => {
+            const div = document.createElement('div');
+            div.className = 'result-item';
+            div.innerHTML = `
+              <h3>${item.duration}</h3>
+              <p><strong>Path:</strong> ${item.path.join(' -> ')}</p>
+            `;
+            div.addEventListener('click', () => showModal(item.fullDetails.addresses, item.fullDetails.durations));
+            responseContainer.appendChild(div);
+          });
+        }
+
+        // Re-enable submit button and restore text
+        submitButton.disabled = false;
+        submitButton.innerHTML = 'Submit';
+      })
+      .catch(error => {
+        document.getElementById('response').textContent = 'Error: ' + error;
+        // Re-enable submit button and restore text
+        submitButton.disabled = false;
+        submitButton.innerHTML = 'Submit';
+      });
+    });
+
+    function showModal(addresses, durations) {
+      const modal = document.getElementById('modal');
+      const modalAddresses = document.getElementById('modalAddresses');
+
+      modalAddresses.innerHTML = durations.map((dur, i) => {
+        const from = addresses[i];
+        const to = addresses[i + 1] || addresses[0]; // Wrap around to the first address
+        return `<li>${from} to ${to}: ${dur}</li>`;
+      }).join('');
+
+      modal.style.display = 'block';
+    }
+
+    document.getElementById('closeModal').addEventListener('click', () => {
+      document.getElementById('modal').style.display = 'none';
+    });
+
+    window.onclick = function(event) {
+      const modal = document.getElementById('modal');
+      if (event.target === modal) {
+        modal.style.display = 'none';
+      }
+    };
+  </script>
+</body>
+</html>
